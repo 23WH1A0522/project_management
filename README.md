@@ -1,25 +1,25 @@
-# 🚀 WorkTrack: Full Stack Project Management Platform
+# 🚀 WorkTrack: MERN Project Management Platform
 
-
-**StackTrack** is a robust, full-stack project management application (inspired by tools like Jira and Asana) designed to streamline team collaboration, workspace organization, and task tracking. Built using the modern **MERN Stack** (Mongodb, Express, React, Node.js), it features secure authentication, real-time updates, and automated email notifications.
+**WorkTrack** is a robust, full-stack project management application (inspired by tools like Jira and Asana) designed to streamline team collaboration, workspace organization, and task tracking. Built using the **MERN Stack** (MongoDB, Express, React, Node.js), it features secure authentication, real-time updates, and automated email notifications.
 
 ---
 
 ## 📖 Introduction
 
-This platform serves as a centralized hub for teams to manage their workflows. Users can create distinct **Organizations (Workspaces)**, invite team members via email, create multiple **Projects**, and track progress using Kanban-style **Tasks**. The application ensures data integrity and security through Role-Based Access Control (RBAC) and keeps users informed with automated email alerts for task assignments and due dates.
+This platform serves as a centralized hub for teams to manage their workflows. Users can create distinct **Organizations (Workspaces)**, invite team members via email, create multiple **Projects**, and track progress using Kanban-style **Tasks**. The application ensures data integrity and security through Role-Based Access Control (RBAC) and keeps users informed with automated email alerts.
 
 ---
 
 ## 🏗 System Architecture
 
-The application follows a monolithic client-server architecture with a clear separation of concerns:
+The application follows a monolithic client-server architecture:
 
-1.  **Frontend (Client):** A React application built with Vite, handling the UI, state management, and user interactions.
-2.  **Backend (Server):** A Node.js/Express REST API that handles business logic, database operations, and external integrations.
-3.  **Database:** A serverless Mongodb database.
-4.  **Authentication & Sync:** Clerk handles user identity, syncing user data to the backend database via Webhooks.
-5.  **Background Services:** Inngest manages background jobs, such as sending emails and syncing webhook events.
+1.  **Frontend (Client):** A React application built with Vite, handling the UI and state management (Redux).
+2.  **Backend (Server):** A Node.js/Express REST API that handles business logic.
+3.  **Database:** **MongoDB** (Atlas or Local) for storing flexible, document-based data.
+4.  **ORM:** **Mongoose** for data modeling and validation.
+5.  **Authentication:** **Clerk** handles user identity and authentication flows.
+6.  **Background Services:** **Inngest** manages background jobs (emails, webhooks).
 
 ---
 
@@ -30,81 +30,85 @@ The application follows a monolithic client-server architecture with a clear sep
 * **Language:** JavaScript (ES6+)
 * **Styling:** Tailwind CSS
 * **State Management:** Redux Toolkit
-* **Routing:** React Router DOM
 * **HTTP Client:** Axios
 * **Icons:** Lucide React
-* **Notifications:** React Hot Toast
 
 ### **Backend**
 * **Runtime:** Node.js
 * **Framework:** Express.js
-* **Database:** Mongodb
-* **ORM:** Prisma
-* **Authentication:** Clerk (Clerk SDK & Middleware)
-* **Email Service:** Nodemailer (SMTP via Brevo/Sendinblue)
-* **Event Handling:** Inngest (for Webhooks & Cron jobs)
-* **Security:** CORS, Dotenv
+* **Database:** MongoDB
+* **ODM:** Mongoose
+* **Authentication:** Clerk (Clerk SDK)
+* **Email Service:** Nodemailer (SMTP via Brevo)
+* **Event Handling:** Inngest
 
 ---
 
 ## ✨ Key Features
 
-### 🔐 Authentication & Security
-* **Secure Sign-up/Login:** Powered by Clerk (Google OAuth & Email).
-* **Role-Based Access Control (RBAC):** Distinct permissions for Workspace Admins vs. Members.
-* **Protected Routes:** Middleware ensures only authenticated users access private data.
-
-### 🏢 Workspace Management
-* **Multi-Tenancy:** Users can create and switch between multiple Workspaces (Organizations).
-* **Team Invitations:** Admins can invite users to workspaces via email.
-* **Member Management:** View and manage list of workspace members and their roles.
-
-### 📂 Project & Task Tracking
-* **Project Dashboard:** Visual overview of all active projects, status, and progress.
-* **Task Management:** Create tasks with rich details: Title, Description, Priority, Due Date, and Status (To Do, In Progress, Done).
-* **Task Types:** Categorize work into 'Task', 'Bug', 'Feature', or 'Improvement'.
-* **Assignments:** Assign tasks to specific team members.
-
-### 💬 Collaboration
-* **Comments:** Real-time commenting system on individual tasks.
-* **Activity Feed:** Track project updates and changes.
-
-### 📧 Notifications
-* **Email Alerts:** Automated emails sent via Nodemailer when a task is assigned.
-* **Due Date Reminders:** Scheduled background jobs (Inngest) send reminders for approaching deadlines.
+* **🔐 Authentication:** Secure Sign-up/Login via Clerk (Google/Email).
+* **🏢 Workspace Management:** Create and switch between multiple organizations (multi-tenancy).
+* **👥 Team Collaboration:** Invite members via email; manage Admin/Member roles.
+* **📂 Project Tracking:** Track project status, start dates, and deadlines.
+* **✅ Task Management:** Kanban-style task tracking (To Do, In Progress, Done) with priorities.
+* **💬 Comments:** Real-time discussion threads on tasks.
+* **📧 Notifications:** Automated email alerts for task assignments and due dates.
 
 ---
 
-## 🗄 Database Schema
+## 🗄 Database Schema (MongoDB)
 
-The database is structured using **7 Core Tables** defined in the Prisma schema:
+The database consists of **7 Mongoose Collections**.
 
 ### 1. **User**
-* Stores user identity synced from Clerk.
-* **Fields:** `id` (String), `name`, `email`, `image`, `createdAt`, `updatedAt`.
+Stores user identity.
+- `clerkId`: String (Unique, from Clerk)
+- `name`: String
+- `email`: String
+- `image`: String
+- `createdAt`: Date
 
 ### 2. **Workspace**
-* Represents an organization or company.
-* **Fields:** `id` (UUID), `name`, `slug` (unique), `imageUrl`, `ownerId`.
+Represents an organization.
+- `name`: String
+- `slug`: String (Unique)
+- `imageUrl`: String
+- `ownerId`: ObjectId (Ref: User)
 
 ### 3. **WorkspaceMember**
-* Junction table linking Users to Workspaces.
-* **Fields:** `id`, `workspaceId`, `userId`, `role` (Admin/Member).
+Links users to workspaces.
+- `workspaceId`: ObjectId (Ref: Workspace)
+- `userId`: ObjectId (Ref: User)
+- `role`: String ('Admin' | 'Member')
 
 ### 4. **Project**
-* A container for tasks within a workspace.
-* **Fields:** `id`, `name`, `description`, `status`, `priority`, `startDate`, `endDate`, `teamLeadId`.
+Container for tasks.
+- `workspaceId`: ObjectId (Ref: Workspace)
+- `name`: String
+- `status`: String ('Planning', 'Active', 'Completed')
+- `priority`: String
+- `startDate`: Date
+- `endDate`: Date
+- `teamLeadId`: ObjectId (Ref: User)
 
 ### 5. **ProjectMember**
-* Links workspace members to specific projects.
-* **Fields:** `id`, `projectId`, `userId`.
+Assigns workspace members to specific projects.
+- `projectId`: ObjectId (Ref: Project)
+- `userId`: ObjectId (Ref: User)
 
 ### 6. **Task**
-* Individual units of work to be tracked.
-* **Fields:** `id`, `title`, `description`, `type`, `status`, `priority`, `dueDate`, `assigneeId`.
+Individual work items.
+- `projectId`: ObjectId (Ref: Project)
+- `assigneeId`: ObjectId (Ref: User)
+- `title`: String
+- `description`: String
+- `type`: String ('Task', 'Bug', 'Feature', 'Improvement')
+- `status`: String ('To Do', 'In Progress', 'Done')
+- `priority`: String
+- `dueDate`: Date
 
 ### 7. **Comment**
-* Discussion threads on specific tasks.
-* **Fields:** `id`, `taskId`, `userId`, `content`, `createdAt`.
-
----
+Discussions on tasks.
+- `taskId`: ObjectId (Ref: Task)
+- `userId`: ObjectId (Ref: User)
+- `content`: String
