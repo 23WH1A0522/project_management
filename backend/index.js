@@ -1,14 +1,14 @@
 import express from "express";
 import dotenv from "dotenv";
-import { connectMongoose } from "./config/connect.js";
+import { connectMongoose } from "../config/connect.js";
 import cors from "cors";
 
 // Routes Import
-import authRoutes from "./routes/authRoutes.js";
-import workspaceRoutes from "./routes/workspaceRoutes.js";
-import projectRoutes from "./routes/projectRoutes.js";
-import taskRoutes from "./routes/taskRoutes.js";
-import commentRoutes from "./routes/commentRoutes.js";
+import authRoutes from "../routes/authRoutes.js";
+import workspaceRoutes from "../routes/workspaceRoutes.js";
+import projectRoutes from "../routes/projectRoutes.js";
+import taskRoutes from "../routes/taskRoutes.js";
+import commentRoutes from "../routes/commentRoutes.js";
 
 dotenv.config({ path: "../.env" });
 
